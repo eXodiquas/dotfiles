@@ -75,7 +75,7 @@ bindsym $mod+Ctrl+x --release exec --no-startup-id xkill
 # change focus
 #bindsym $mod+j focus left
 #bindsym $mod+k focus down
-bindsym $mod+l exec ~/lock.sh
+bindsym $mod+l exec blurlock
 #bindsym $mod+semicolon focus right
 
 # alternatively, you can use the cursor keys:
@@ -422,7 +422,6 @@ mode "$mode_gaps_outer" {
 bindsym $mod+x exec fzf
 
 exec xrandr --output HDMI1 --off --output VIRTUAL1 --off --output DP1 --off --output eDP1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP2 --off
-exec feh --bg-scale ~/Pictures/wallpaper.png
 exec code
 exec thunderbird
 exec firefox
