@@ -20,6 +20,8 @@ There are two things you can do about this warning:
 (when (version<= "26.0.50" emacs-version )
   (global-display-line-numbers-mode))
 
+;; following packages have to be installed via 'install-package': company, yasnippet, rainbow-delimiter, neotree, dark-phoenix-pink-theme
+
  ;; start company mode for clojure autocompeltion
 (global-company-mode t)
 
