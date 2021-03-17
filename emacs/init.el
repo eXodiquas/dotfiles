@@ -2,42 +2,58 @@
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
-  (when no-ssl
-    (warn "\
-Your version of Emacs does not support SSL connections,
-which is unsafe because it allows man-in-the-middle attacks.
-There are two things you can do about this warning:
-1. Install an Emacs version that does support SSL and be safe.
-2. Remove this warning from your init file so you won't see it again."))
-  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
   (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
- ;; show line numbers
-(when (version<= "26.0.50" emacs-version )
-  (global-display-line-numbers-mode))
 
-;; following packages have to be installed via 'install-package': company, yasnippet, rainbow-delimiter, neotree, dark-phoenix-pink-theme
 
- ;; start company mode for clojure autocompeltion
-(global-company-mode t)
+;; Initial buffer
+(setq initial-major-mode 'org-mode)
 
- ;; activate global mode for yasnippet
-(yas-global-mode t)
+(setq inferior-lisp-program "sbcl")
 
- ;; start with rainbow delimiter mode
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
- ;; start neo tree
-(neotree)
-
- ;; diable menu-bar, scroll-bar and tool-bar
+;; disable menu-bar, scroll-bar and tool-bar
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
-(tool-bar-mode -1) 
+(tool-bar-mode -1)
+
+;; If not present, install 'use-package.
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+;; Pull missing packages
+(setq use-package-always-ensure t)
+
+;; Auto activates company-mode for every mode
+(use-package company
+  :config (global-company-mode t))
+
+(use-package paredit
+  :hook ((emacs-lisp-mode
+	  lisp-mode
+	  eval-expression-minibuffer-setup
+	  lisp-interaction) . enable-paredit-mode))
+
+(use-package yasnippet
+  :config (yas-global-mode t))
+
+(use-package rainbow-delimiters
+  :hook ((prog-mode) . rainbow-delimiters-mode-enable))
+
+(use-package ox-latex
+  )
+
+;; enable latex export from org
+(require 'ox-latex)
+(unless (boundp 'org-latex-classes)
+  (setq org-latex-classes nil))
+(add-to-list 'org-latex-classes
+             '("article"
+               "\\documentclass{article}"
+               ("\\section{%s}" . "\\section*{%s}")))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -46,27 +62,32 @@ There are two things you can do about this warning:
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
- '(custom-enabled-themes (quote (wombat)))
+ '(ansi-color-names-vector
+   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
+ '(blink-cursor-mode nil)
+ '(custom-enabled-themes '(spacemacs-dark))
  '(custom-safe-themes
-   (quote
-    ("04589c18c2087cd6f12c01807eed0bdaa63983787025c209b89c779c61c3a4c4" default)))
+   '("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "72e041c9a2cec227a33e0ac4b3ea751fd4f4039235035894bf18b1c0901e1bd6" "e5dc5b39fecbeeb027c13e8bfbf57a865be6e0ed703ac1ffa96476b62d1fae84" "04589c18c2087cd6f12c01807eed0bdaa63983787025c209b89c779c61c3a4c4" default))
  '(fringe-mode 6 nil (fringe))
- '(initial-frame-alist (quote ((fullscreen . maximized))))
- '(linum-format (quote dynamic))
+ '(global-display-line-numbers-mode t)
+ '(inhibit-startup-screen t)
+ '(initial-buffer-choice "~/Documents/todo.org")
+ '(initial-frame-alist '((fullscreen . maximized)))
+ '(initial-major-mode 'org-mode)
+ '(initial-scratch-message
+   "#+title What a wonderful day <3
+#+autor Timo 'eXodiquas' Netzer
+")
+ '(linum-format 'dynamic)
+ '(menu-bar-mode nil)
+ '(org-agenda-files '("~/Documents/todo.org"))
  '(package-selected-packages
-   (quote
-    (company ac-cider clojure-snippets cherry-blossom-theme rainbow-delimiters neotree projectile cider-eval-sexp-fu cider-hydra cider yasnippet-snippets yasnippet-classic-snippets spinner sesman queue pkg-info parseedn clojure-mode ac-sly))))
+   '(switch-window lsp-ui racer lsp-mode company-box lsp-latex dmenu spacemacs-theme space-theming sly paredit ac-dcd xresources-theme d-mode crystal-mode latex-preview-pane company ac-cider clojure-snippets cherry-blossom-theme rainbow-delimiters neotree projectile cider-eval-sexp-fu cider-hydra cider yasnippet-snippets yasnippet-classic-snippets spinner sesman queue pkg-info parseedn clojure-mode ac-sly))
+ '(tool-bar-mode nil))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(rainbow-delimiters-depth-1-face ((t (:inherit rainbow-delimiters-base-face :foreground "red"))))
- '(rainbow-delimiters-depth-2-face ((t (:inherit rainbow-delimiters-base-face :foreground "yellow"))))
- '(rainbow-delimiters-depth-3-face ((t (:inherit rainbow-delimiters-base-face :foreground "green"))))
- '(rainbow-delimiters-depth-4-face ((t (:inherit rainbow-delimiters-base-face :foreground "cyan"))))
- '(rainbow-delimiters-depth-5-face ((t (:inherit rainbow-delimiters-base-face :foreground "blue"))))
- '(rainbow-delimiters-depth-6-face ((t (:inherit rainbow-delimiters-base-face :foreground "magenta"))))
- '(rainbow-delimiters-depth-7-face ((t (:inherit rainbow-delimiters-base-face :foreground "sienna"))))
- '(rainbow-delimiters-depth-8-face ((t (:inherit rainbow-delimiters-base-face :foreground "sandy brown"))))
- '(rainbow-delimiters-depth-9-face ((t (:inherit rainbow-delimiters-base-face :foreground "light goldenrod")))))
+ '(default ((t (:family "DejaVu Sans Mono for Powerline" :foundry "PfEd" :slant normal :weight normal :height 115 :width normal)))))
