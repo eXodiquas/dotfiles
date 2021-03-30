@@ -1,4 +1,5 @@
 (require 'package)
+;; Setting up melpa
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
@@ -7,13 +8,11 @@
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
 
-
 ;; Initial buffer
 (setq initial-major-mode 'org-mode)
-
 (setq inferior-lisp-program "sbcl")
 
-;; disable menu-bar, scroll-bar and tool-bar
+;; Disable menu-bar, scroll-bar and tool-bar
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
@@ -31,20 +30,59 @@
 (use-package company
   :config (global-company-mode t))
 
+;; Using paredit in the Lisp buffers
 (use-package paredit
   :hook ((emacs-lisp-mode
 	  lisp-mode
 	  eval-expression-minibuffer-setup
 	  lisp-interaction) . enable-paredit-mode))
 
+;; Setup lsp for Rust
+(use-package lsp-mode
+  :ensure
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+;; Setup lsp-ui for better lsp feeling
+(use-package lsp-ui
+  :ensure
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-doc-enable t))
+
+;; Yasnippet for helpful snippets
 (use-package yasnippet
   :config (yas-global-mode t))
 
+;; CL snippets for yasnippets
+(use-package common-lisp-snippets)
+
+;; Renders a fireplace. Kappa
+(use-package fireplace)
+
+;; Nicer way to switch between buffers if there are more than 2.
+;; Overrides the default command.
+(use-package switch-window
+  :bind ("C-o" . switch-window))
+
+;; Nice colorful parentheses.
 (use-package rainbow-delimiters
   :hook ((prog-mode) . rainbow-delimiters-mode-enable))
 
-(use-package ox-latex
-  )
+;; Project management tooling.
+(use-package projectile
+  :config (projectile-mode t)
+  :bind-keymap
+  ("s-p" . projectile-command-map)
+  ("C-c p" . projectile-command-map))
 
 ;; enable latex export from org
 (require 'ox-latex)
@@ -72,6 +110,7 @@
  '(global-display-line-numbers-mode t)
  '(inhibit-startup-screen t)
  '(initial-buffer-choice "~/Documents/todo.org")
+ '()
  '(initial-frame-alist '((fullscreen . maximized)))
  '(initial-major-mode 'org-mode)
  '(initial-scratch-message
@@ -82,7 +121,7 @@
  '(menu-bar-mode nil)
  '(org-agenda-files '("~/Documents/todo.org"))
  '(package-selected-packages
-   '(switch-window lsp-ui racer lsp-mode company-box lsp-latex dmenu spacemacs-theme space-theming sly paredit ac-dcd xresources-theme d-mode crystal-mode latex-preview-pane company ac-cider clojure-snippets cherry-blossom-theme rainbow-delimiters neotree projectile cider-eval-sexp-fu cider-hydra cider yasnippet-snippets yasnippet-classic-snippets spinner sesman queue pkg-info parseedn clojure-mode ac-sly))
+   '(magit org-pomodoro fireplace common-lisp-snippets lsp switch-window lsp-ui racer lsp-mode company-box lsp-latex dmenu spacemacs-theme space-theming sly paredit ac-dcd xresources-theme d-mode crystal-mode latex-preview-pane company ac-cider clojure-snippets cherry-blossom-theme rainbow-delimiters neotree projectile cider-eval-sexp-fu cider-hydra cider yasnippet-snippets yasnippet-classic-snippets spinner sesman queue pkg-info parseedn clojure-mode ac-sly))
  '(tool-bar-mode nil))
 
 (custom-set-faces
